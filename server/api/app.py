@@ -111,10 +111,15 @@ def create_app(settings: Settings | None = None, claude: AsyncAnthropic | None =
     @app.get("/api/sessions/{session_id}/messages")
     def session_messages(session_id: str) -> list[ChatMessage]:
         """Return the visible text of a saved chat, without tool traffic."""
-        visible = []
+        visible: list[ChatMessage] = []
         for message in chats.load(session_id):
             text = _visible_text(message["content"])
-            if text:
+            if not text:
+                continue
+            # One assistant turn can span several messages when it calls tools in between.
+            if visible and visible[-1].role == message["role"] == "assistant":
+                visible[-1].text += "\n\n" + text
+            else:
                 visible.append(ChatMessage(role=message["role"], text=text))
         return visible
 

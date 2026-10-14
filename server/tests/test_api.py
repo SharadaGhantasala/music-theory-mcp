@@ -90,14 +90,14 @@ def test_follow_up_sees_the_earlier_turn(tmp_path):
 
 def test_tool_traffic_is_hidden_from_saved_messages(tmp_path):
     script = (
-        reply(tool_use("call_1", "identify_chord", {"pitches": CHORDS[0]})),
+        reply(text("Checking."), tool_use("call_1", "identify_chord", {"pitches": CHORDS[0]})),
         reply(text("C major.")),
     )
     with _client(tmp_path, *script) as client:
         _chat(client, "what chord?")
         assert client.get("/api/sessions/s1/messages").json() == [
             {"role": "user", "text": "what chord?"},
-            {"role": "assistant", "text": "C major."},
+            {"role": "assistant", "text": "Checking.\n\nC major."},
         ]
 
 
