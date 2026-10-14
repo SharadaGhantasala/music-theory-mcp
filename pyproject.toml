@@ -1,0 +1,54 @@
+[project]
+name = "music-theory-mcp"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+    "mcp>=2.3.0",
+    "music21>=10.5.0",
+    "pydantic>=2.14.1",
+    "sqlalchemy>=2.1.4",
+]
+
+[dependency-groups]
+dev = [
+    "import-linter>=2.0",
+    "pytest>=8.0",
+    "ruff>=0.6",
+]
+
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+testpaths = ["core/tests", "server/tests"]
+pythonpath = ["."]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.importlinter]
+root_packages = ["core", "server"]
+include_external_packages = true
+
+[[tool.importlinter.contracts]]
+name = "core does not depend on server"
+type = "forbidden"
+source_modules = ["core"]
+forbidden_modules = ["server"]
+
+[[tool.importlinter.contracts]]
+name = "only core.engine imports music21"
+type = "forbidden"
+source_modules = ["core.models", "core.services", "server"]
+forbidden_modules = ["music21"]
+allow_indirect_imports = true
+
+[[tool.importlinter.contracts]]
+name = "agent reaches theory only through MCP"
+type = "forbidden"
+source_modules = ["server.agent"]
+forbidden_modules = ["core"]
+allow_indirect_imports = true
