@@ -11,6 +11,11 @@ def render_musicxml(events: list[list[str]]) -> str:
     return engine.to_musicxml(events)
 
 
+def render_midi(events: list[list[str]]) -> bytes:
+    """Render notes and chords as a MIDI file. Raises InvalidNoteError on a bad pitch."""
+    return engine.to_midi(events)
+
+
 def ascending(notes: list[str], octave: int = 4) -> list[str]:
     """Give octaves to pitch classes so they climb, e.g. ["A", "B", "C"] -> ["A4", "B4", "C5"]."""
     pitches = []

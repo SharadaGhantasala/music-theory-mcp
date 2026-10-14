@@ -5,6 +5,7 @@ from mcp import Client
 
 from server.mcp_server import build_server
 from server.store.artifacts import ArtifactStore
+from server.store.db import open_database
 
 pytestmark = pytest.mark.anyio
 
@@ -16,7 +17,7 @@ def anyio_backend():
 
 @pytest.fixture
 def store(tmp_path):
-    return ArtifactStore(f"sqlite:///{tmp_path / 'test.db'}")
+    return ArtifactStore(open_database(f"sqlite:///{tmp_path / 'test.db'}"))
 
 
 @pytest.fixture

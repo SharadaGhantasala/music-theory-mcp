@@ -2,14 +2,11 @@ import json
 import uuid
 from dataclasses import dataclass
 from datetime import UTC, datetime
-from pathlib import Path
 
-from sqlalchemy import create_engine, make_url
-from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column
+from sqlalchemy import Engine
+from sqlalchemy.orm import Mapped, Session, mapped_column
 
-
-class Base(DeclarativeBase):
-    pass
+from server.store.db import Base
 
 
 class _ArtifactRow(Base):
@@ -35,12 +32,8 @@ class StoredArtifact:
 class ArtifactStore:
     """Keeps rendered scores so the UI can fetch them and later tools can build on them."""
 
-    def __init__(self, database_url: str) -> None:
-        path = make_url(database_url).database
-        if path and path != ":memory:":
-            Path(path).parent.mkdir(parents=True, exist_ok=True)
-        self._engine = create_engine(database_url)
-        Base.metadata.create_all(self._engine)
+    def __init__(self, engine: Engine) -> None:
+        self._engine = engine
 
     def save(self, kind: str, content: str, events: list[list[str]]) -> str:
         """Save a score and return the id it can be fetched by."""

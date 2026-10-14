@@ -3,7 +3,7 @@ import xml.etree.ElementTree as ET
 import pytest
 
 from core.errors import InvalidNoteError
-from core.services.notation import ascending, render_musicxml
+from core.services.notation import ascending, render_midi, render_musicxml
 
 
 def test_render_musicxml_is_well_formed():
@@ -21,9 +21,15 @@ def test_render_musicxml_structure():
     assert "<alter>-1</alter>" in document
 
 
+def test_render_midi_is_a_midi_file():
+    assert render_midi([["C4"], ["C4", "E4", "G4"]]).startswith(b"MThd")
+
+
 def test_render_rejects_bad_pitch():
     with pytest.raises(InvalidNoteError):
         render_musicxml([["C"]])
+    with pytest.raises(InvalidNoteError):
+        render_midi([["C"]])
 
 
 @pytest.mark.parametrize(

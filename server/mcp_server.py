@@ -20,6 +20,7 @@ from core.services import chords, intervals, notation, progressions, scales
 from core.services import transpose as transposition
 from server.config import load_settings
 from server.store.artifacts import ArtifactStore
+from server.store.db import open_database
 
 _INSTRUCTIONS = (
     "Music theory tools. Pitches are written with an octave, like C4, F#3 or Bb2. "
@@ -183,7 +184,7 @@ def build_server(store: ArtifactStore) -> MCPServer:
 
 def main() -> None:
     """Run over stdio, for Claude Desktop and the MCP Inspector."""
-    build_server(ArtifactStore(load_settings().database_url)).run("stdio")
+    build_server(ArtifactStore(open_database(load_settings().database_url))).run("stdio")
 
 
 if __name__ == "__main__":
