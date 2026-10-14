@@ -131,8 +131,14 @@ export function App() {
   return (
     <div className="app">
       <header className="topbar">
-        <h1 className="brand">Music Theory MCP</h1>
-        <button className="ghost" onClick={startNewChat} disabled={busy}>
+        <h1 className="brand">
+          <svg className="mark" viewBox="0 0 14 14" aria-hidden="true">
+            <path d="M1 3v8M5 6v7M9 1v8M13 4v8" />
+          </svg>
+          Music Theory MCP
+        </h1>
+        <span className="caption topbar-caption">Theory tools — Claude — music21</span>
+        <button className="link" onClick={startNewChat} disabled={busy}>
           New chat
         </button>
       </header>

@@ -152,7 +152,7 @@ export function Notation({ artifactId, onExplain }: Props) {
   };
 
   return (
-    <div className="card notation">
+    <div className="card notation framed">
       <div className="card-head">
         <div className="label">Notation</div>
         {artifactId && (

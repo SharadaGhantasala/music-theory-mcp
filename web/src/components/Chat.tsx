@@ -44,15 +44,29 @@ export function Chat({ turns, busy, onSend, onShowScore }: Props) {
       <div className="messages">
         {turns.length === 0 ? (
           <div className="empty">
-            <h2>Ask about any chord, scale or progression.</h2>
-            <p>The answers come from real theory tools, and the notation appears beside the chat.</p>
-            <div className="suggestions">
-              {SUGGESTIONS.map((suggestion) => (
-                <button key={suggestion} className="suggestion" onClick={() => onSend(suggestion)}>
-                  {suggestion}
-                </button>
+            <h2 className="display">
+              Music
+              <br />
+              Theory.
+            </h2>
+            <p className="caption">Ask — Analyze — Listen</p>
+            <p className="lede">
+              Ask about any chord, scale or progression. The answers come from real theory tools,
+              and the notation appears beside the chat.
+            </p>
+            <ol className="suggestions">
+              {SUGGESTIONS.map((suggestion, index) => (
+                <li key={suggestion}>
+                  <button className="suggestion" onClick={() => onSend(suggestion)}>
+                    <span className="number">{String(index + 1).padStart(2, "0")}</span>
+                    <span>{suggestion}</span>
+                    <span className="arrow" aria-hidden="true">
+                      →
+                    </span>
+                  </button>
+                </li>
               ))}
-            </div>
+            </ol>
           </div>
         ) : (
           turns.map((turn, index) => {
