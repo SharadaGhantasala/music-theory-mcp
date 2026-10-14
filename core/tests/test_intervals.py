@@ -16,6 +16,8 @@ from core.services.intervals import get_interval
         ("C4", "C5", "P8", "Perfect Octave", 12, "up"),
         ("C4", "C4", "P1", "Perfect Unison", 0, "up"),
         ("C4", "D5", "M9", "Major Ninth", 14, "up"),
+        ("C4", "C#4", "A1", "Augmented Unison", 1, "up"),
+        ("C#4", "C4", "A1", "Augmented Unison", -1, "down"),
     ],
 )
 def test_get_interval(first, second, name, description, semitones, direction):

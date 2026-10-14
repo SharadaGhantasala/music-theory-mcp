@@ -1,8 +1,8 @@
 """The typed events the agent streams to the browser, one per server-sent event."""
 
-from typing import Any, Literal
+from typing import Annotated, Any, Literal
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class TextDelta(BaseModel):
@@ -64,7 +64,9 @@ class Done(BaseModel):
     usage: Usage
 
 
-Event = TextDelta | ToolCall | ToolResult | ArtifactReady | Error | Done
+Event = Annotated[
+    TextDelta | ToolCall | ToolResult | ArtifactReady | Error | Done, Field(discriminator="type")
+]
 
 
 def to_sse(event: Event) -> str:

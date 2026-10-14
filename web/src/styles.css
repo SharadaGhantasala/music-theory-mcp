@@ -357,6 +357,74 @@ pre {
   overflow-x: auto;
 }
 
+.hint.small {
+  font-size: 12px;
+  margin-top: -4px;
+}
+
+/* Notes in the score: clickable, and lit while they sound. */
+.score g.clickable {
+  cursor: pointer;
+}
+
+.score g.clickable:hover path,
+.score g.clickable:focus path,
+.score g.active path {
+  fill: var(--accent);
+  stroke: var(--accent);
+}
+
+.score g.clickable:focus {
+  outline: none;
+}
+
+/* Analysis beside the circle of fifths */
+
+.side-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 240px;
+  gap: 20px;
+  align-items: start;
+}
+
+.circle svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.circle .spoke,
+.circle .ring {
+  stroke: var(--line);
+  stroke-width: 1;
+  fill: none;
+}
+
+.circle .spoke.lit {
+  stroke: var(--accent);
+  stroke-width: 1.5;
+}
+
+.circle .key text {
+  font-family: var(--serif);
+  font-size: 13px;
+  fill: var(--ink);
+}
+
+.circle .key.minor text {
+  font-family: var(--sans);
+  font-size: 9.5px;
+  fill: var(--muted);
+}
+
+.circle .key.lit circle {
+  fill: var(--accent);
+}
+
+.circle .key.lit text {
+  fill: #fff;
+}
+
 .headline {
   font-family: var(--serif);
   font-size: 28px;
@@ -502,8 +570,13 @@ pre {
     padding: 0 16px;
   }
 
-  .workspace {
+  .workspace,
+  .side-row {
     grid-template-columns: 1fr;
+  }
+
+  .circle {
+    max-width: 320px;
   }
 
   .messages {

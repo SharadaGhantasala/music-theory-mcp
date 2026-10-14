@@ -1,26 +1,17 @@
-// These mirror the Pydantic models in server/agent/events.py and core/models.
+import type { components } from "./api-types";
 
-export type TextDelta = { type: "text_delta"; text: string };
-export type ToolCall = { type: "tool_call"; id: string; name: string; input: Record<string, unknown> };
-export type ToolResult = {
-  type: "tool_result";
-  id: string;
-  name: string;
-  status: "ok" | "error";
-  summary: unknown;
-};
-export type ArtifactReady = { type: "artifact"; tool_call_id: string; kind: string; id: string };
-export type ErrorEvent = { type: "error"; message: string; recoverable: boolean };
-export type Usage = {
-  input_tokens: number;
-  output_tokens: number;
-  cache_read_input_tokens: number;
-  cache_creation_input_tokens: number;
-};
-export type Done = { type: "done"; usage: Usage };
-
+// The streamed events are generated from the backend's OpenAPI schema (npm run types).
+type Schemas = components["schemas"];
+export type TextDelta = Schemas["TextDelta"];
+export type ToolCall = Schemas["ToolCall"];
+export type ToolResult = Schemas["ToolResult"];
+export type ArtifactReady = Schemas["ArtifactReady"];
+export type ErrorEvent = Schemas["Error"];
+export type Usage = Schemas["Usage"];
+export type Done = Schemas["Done"];
 export type AgentEvent = TextDelta | ToolCall | ToolResult | ArtifactReady | ErrorEvent | Done;
 
+// Tool summaries travel as untyped JSON in the events. These mirror the models in core/models.
 export type Chord = { root: string; quality: string; pitches: string[]; bass: string | null };
 export type Scale = { root: string; type: string; notes: string[] };
 export type ScaleMatch = { scale: Scale; score: number; outside: string[] };

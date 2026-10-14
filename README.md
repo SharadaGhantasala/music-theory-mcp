@@ -9,7 +9,9 @@ Claude decides which tool to call, the tools compute the answer with [music21](h
 ## What it does
 
 - **Chat** with streaming replies and collapsible tool-call cards.
-- **Notation panel** rendered from MusicXML, with playback and MIDI download.
+- **Notation panel** rendered from MusicXML, with playback that lights each chord as it sounds, and MIDI download.
+- **Click to explain.** Click any note or chord in the score to ask what it is and what it does.
+- **Analysis panel** for the latest result, and a **circle of fifths** with the current key lit.
 - **Six theory tools:** identify a chord, look up a scale, detect the scale from notes, name an interval, transpose, and analyze a progression (key, Roman numerals, cadences).
 - **Follow-ups work.** "Transpose that up a fourth" transposes the score already on screen.
 
@@ -34,6 +36,12 @@ uv run --env-file .env uvicorn server.api.main:app --port 8000
 ```
 
 For frontend development, run `npm run dev` in `web/` and open http://localhost:5173. It proxies API calls to the backend on port 8000.
+
+**To try the MCP server on its own** with the MCP Inspector:
+
+```bash
+npx @modelcontextprotocol/inspector uv run python -m server.mcp_server
+```
 
 **As an MCP server in Claude Desktop**, add this to its config:
 
@@ -99,7 +107,7 @@ flowchart TD
 
 **Score handles for follow-ups.** The artifact id doubles as a handle. `transpose` accepts a `score_id`, so Claude can transpose a whole earlier score without resending its notes.
 
-**A typed event protocol.** The agent streams six server-sent events, defined as Pydantic models in `server/agent/events.py` and mirrored in `web/src/types.ts`:
+**A typed event protocol.** The agent streams six server-sent events, defined as Pydantic models in `server/agent/events.py`. They are published in the OpenAPI schema, and `npm run types` in `web/` generates the TypeScript types from it, so a change on the backend breaks the frontend build instead of failing quietly:
 
 | Event | Carries |
 |---|---|
@@ -127,12 +135,13 @@ flowchart TD
 ## Tests
 
 ```bash
-uv run pytest          # 204 tests
+uv run pytest          # 215 tests
 uv run ruff check .
 uv run lint-imports    # the three architecture rules
 ```
 
-- **Core:** golden cases for every tool, plus round-trip properties such as "transpose up then down returns the original".
+- **Core:** golden cases for every tool.
+- **Properties** with [Hypothesis](https://hypothesis.readthedocs.io/): transposing up then down returns the original, every inversion of a chord keeps its root and quality, and scale detection ignores octaves. These found a real bug, now fixed: a falling augmented unison was named a diminished unison.
 - **MCP server:** called through a real MCP client, in memory.
 - **Agent:** run against a scripted stand-in for the Claude API, covering the round cap, timeouts, tool-error recovery, parallel tool calls and API failures.
 - **REST API:** the full chat stream, score download, MIDI export and saved history.
@@ -148,6 +157,6 @@ uv run lint-imports    # the three architecture rules
 
 - A tool-selection eval harness that runs in CI and reports an accuracy number.
 - A Carnatic layer: melakarta and janya ragas, swara-to-pitch mapping, closest-raga lookup.
-- Hypothesis property tests and wider golden coverage.
+- Wider golden coverage, checked against a second theory source.
 - A per-turn trace of tools, latency and token use.
 - Voice-leading checks and melody harmonization.

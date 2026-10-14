@@ -3,7 +3,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { fetchSavedMessages, streamChat } from "./api";
 import { AnalysisPanel } from "./components/AnalysisPanel";
 import { Chat } from "./components/Chat";
+import { CircleOfFifths } from "./components/CircleOfFifths";
 import { Notation } from "./components/Notation";
+import { keyOf } from "./keys";
 import type { AgentEvent, Analysis, Part, Turn } from "./types";
 
 const SESSION_KEY = "music-theory-mcp-session";
@@ -137,8 +139,16 @@ export function App() {
       <main className="workspace">
         <Chat turns={turns} busy={busy} onSend={send} onShowScore={setArtifactId} />
         <section className="side">
-          <Notation artifactId={artifactId} />
-          <AnalysisPanel analysis={analysis} />
+          <Notation
+            artifactId={artifactId}
+            onExplain={(position, pitches) =>
+              send(`Explain note or chord ${position} in the score on screen (${pitches.join(" ")}): what it is and what it does here.`)
+            }
+          />
+          <div className="side-row">
+            <AnalysisPanel analysis={analysis} />
+            <CircleOfFifths focus={keyOf(analysis)} />
+          </div>
         </section>
       </main>
     </div>

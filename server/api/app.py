@@ -13,7 +13,7 @@ from mcp import Client
 from pydantic import BaseModel, Field
 
 from core.services import notation
-from server.agent.events import Done, Error, Usage, to_sse
+from server.agent.events import Done, Error, Event, Usage, to_sse
 from server.agent.loop import run_turn
 from server.config import Settings, load_settings
 from server.mcp_server import build_server
@@ -25,6 +25,10 @@ _MUSICXML = "application/vnd.recordare.musicxml+xml"
 _NO_CREDENTIALS = (
     "No Anthropic API key found. Put ANTHROPIC_API_KEY in a .env file and restart the server."
 )
+
+
+class EventStreamResponse(StreamingResponse):
+    media_type = "text/event-stream"
 
 
 class ChatRequest(BaseModel):
@@ -75,8 +79,13 @@ def create_app(settings: Settings | None = None, claude: AsyncAnthropic | None =
     def health() -> dict[str, str]:
         return {"status": "ok"}
 
-    @app.post("/api/chat")
-    async def chat(request: ChatRequest) -> StreamingResponse:
+    @app.post(
+        "/api/chat",
+        response_class=EventStreamResponse,
+        # Documents the event types so the frontend's TypeScript types can be generated.
+        responses={200: {"model": Event, "description": "A stream of server-sent events."}},
+    )
+    async def chat(request: ChatRequest) -> EventStreamResponse:
         """Answer a message, streaming typed events (see server/agent/events.py)."""
 
         async def events() -> AsyncIterator[str]:
@@ -102,10 +111,8 @@ def create_app(settings: Settings | None = None, claude: AsyncAnthropic | None =
             finally:
                 chats.append(request.session_id, messages[saved:])
 
-        return StreamingResponse(
-            events(),
-            media_type="text/event-stream",
-            headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+        return EventStreamResponse(
+            events(), headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"}
         )
 
     @app.get("/api/sessions/{session_id}/messages")
@@ -140,7 +147,7 @@ def create_app(settings: Settings | None = None, claude: AsyncAnthropic | None =
     # The MCP endpoint lives beside the REST routes, at /mcp.
     app.router.routes.extend(mcp_app.routes)
 
-    if Path(settings.web_dist).is_dir():
+    if settings.web_dist and Path(settings.web_dist).is_dir():
         app.mount("/", StaticFiles(directory=settings.web_dist, html=True), name="web")
 
     return app

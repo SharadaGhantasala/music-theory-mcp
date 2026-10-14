@@ -54,5 +54,11 @@ def describe(low: str, high: str) -> tuple[str, str, int]:
     """
     from music21 import interval as m21_interval
 
-    found = m21_interval.Interval(load_pitch(low), load_pitch(high))
-    return found.name, found.niceName, found.semitones
+    start, end = load_pitch(low), load_pitch(high)
+    found = m21_interval.Interval(start, end)
+    semitones = found.semitones
+    if semitones < 0:
+        # Name a falling interval by its rising form, so C#4 down to C4 is an augmented
+        # unison, the same as C4 up to C#4. music21 would call it a diminished unison.
+        found = m21_interval.Interval(end, start)
+    return found.name, found.niceName, semitones
