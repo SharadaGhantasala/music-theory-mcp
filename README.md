@@ -9,7 +9,7 @@ Claude decides which tool to call, the tools compute the answer with [music21](h
 ## What it does
 
 - **Chat** with streaming replies and collapsible tool-call cards.
-- **Notation panel** rendered from MusicXML, with playback that lights each chord as it sounds, and MIDI download.
+- **Notation panel** rendered from MusicXML, with piano playback that lights each chord as it sounds, and MIDI download.
 - **Click to explain.** Click any note or chord in the score to ask what it is and what it does.
 - **Analysis panel** for the latest result, and a **circle of fifths** with the current key lit.
 - **Six theory tools:** identify a chord, look up a scale, detect the scale from notes, name an interval, transpose, and analyze a progression (key, Roman numerals, cadences).
@@ -152,6 +152,10 @@ uv run lint-imports    # the three architecture rules
 - Cadences are read from neighbouring chords. There is no rhythm, so phrase endings are a guess.
 - Scale detection sees only notes. It does not know that a dominant seventh points to a key.
 - Scores are drawn as plain quarter notes in 4/4.
+
+## Credits
+
+Piano playback uses the [Salamander Grand Piano](https://archive.org/details/SalamanderGrandPianoV3) samples by Alexander Holm (CC BY 3.0), loaded from the copy hosted by Tone.js.
 
 ## What comes next
 

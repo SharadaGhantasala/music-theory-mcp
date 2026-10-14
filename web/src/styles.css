@@ -7,7 +7,6 @@
   --accent: #4b4acf;
   --problem: #a23a2a;
   --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
-  --sans: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
   --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
 
@@ -25,8 +24,8 @@ body,
 body {
   background: var(--page);
   color: var(--ink);
-  font-family: var(--sans);
-  font-size: 15px;
+  font-family: var(--serif);
+  font-size: 16px;
   line-height: 1.55;
 }
 
@@ -185,7 +184,6 @@ textarea:focus-visible {
 }
 
 .turn.user .text {
-  font-family: var(--serif);
   font-size: 17px;
 }
 
@@ -412,8 +410,7 @@ pre {
 }
 
 .circle .key.minor text {
-  font-family: var(--sans);
-  font-size: 9.5px;
+  font-size: 10px;
   fill: var(--muted);
 }
 

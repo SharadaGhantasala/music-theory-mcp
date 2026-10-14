@@ -1,8 +1,8 @@
 import { OpenSheetMusicDisplay } from "opensheetmusicdisplay";
 import { useEffect, useRef, useState } from "react";
-import * as Tone from "tone";
 
 import { fetchMusicXml, fetchScoreEvents, midiUrl } from "../api";
+import { loadPiano, silencePiano } from "../piano";
 
 const BEAT_SECONDS = 0.6;
 
@@ -16,11 +16,11 @@ type Props = {
 export function Notation({ artifactId, onExplain }: Props) {
   const container = useRef<HTMLDivElement>(null);
   const display = useRef<OpenSheetMusicDisplay | null>(null);
-  const synth = useRef<Tone.PolySynth | null>(null);
   const timers = useRef<number[]>([]);
   const [events, setEvents] = useState<string[][]>([]);
   const [problem, setProblem] = useState<string | null>(null);
   const [playing, setPlaying] = useState(false);
+  const [loadingPiano, setLoadingPiano] = useState(false);
   const [active, setActive] = useState<number | null>(null);
   const explain = useRef(onExplain);
   explain.current = onExplain;
@@ -30,9 +30,7 @@ export function Notation({ artifactId, onExplain }: Props) {
     Array.from(container.current?.querySelectorAll("g.vf-stavenote") ?? []);
 
   const stop = () => {
-    synth.current?.releaseAll();
-    synth.current?.dispose();
-    synth.current = null;
+    silencePiano();
     timers.current.forEach((timer) => window.clearTimeout(timer));
     timers.current = [];
     setPlaying(false);
@@ -129,22 +127,28 @@ export function Notation({ artifactId, onExplain }: Props) {
       stop();
       return;
     }
-    // Browsers only allow sound after a click, which is what this is.
-    await Tone.start();
-    const voice = new Tone.PolySynth(Tone.Synth, {
-      oscillator: { type: "triangle" },
-      envelope: { attack: 0.01, decay: 0.2, sustain: 0.4, release: 0.6 },
-    }).toDestination();
-    synth.current = voice;
+    setLoadingPiano(true);
+    let piano;
+    try {
+      piano = await loadPiano();
+    } catch {
+      setProblem("Could not load the piano sounds. Check your internet connection.");
+      return;
+    } finally {
+      setLoadingPiano(false);
+    }
 
-    const start = Tone.now() + 0.05;
+    // Each note or chord is scheduled with a timer, so Stop can cancel the ones still to come.
     events.forEach((pitches, index) => {
-      voice.triggerAttackRelease(pitches, BEAT_SECONDS * 0.9, start + index * BEAT_SECONDS);
-      // Light up each note or chord as it sounds.
-      timers.current.push(window.setTimeout(() => setActive(index), (50 + index * BEAT_SECONDS * 1000)));
+      timers.current.push(
+        window.setTimeout(() => {
+          setActive(index);
+          piano.triggerAttackRelease(pitches, BEAT_SECONDS * 1.6);
+        }, index * BEAT_SECONDS * 1000),
+      );
     });
     setPlaying(true);
-    timers.current.push(window.setTimeout(stop, (events.length * BEAT_SECONDS + 0.8) * 1000));
+    timers.current.push(window.setTimeout(stop, (events.length * BEAT_SECONDS + 1.2) * 1000));
   };
 
   return (
@@ -156,8 +160,12 @@ export function Notation({ artifactId, onExplain }: Props) {
             <a className="ghost" href={midiUrl(artifactId)}>
               MIDI
             </a>
-            <button className="primary" onClick={play} disabled={events.length === 0}>
-              {playing ? "Stop" : "Play"}
+            <button
+              className="primary"
+              onClick={play}
+              disabled={events.length === 0 || loadingPiano}
+            >
+              {loadingPiano ? "Loading piano" : playing ? "Stop" : "Play"}
             </button>
           </div>
         )}
